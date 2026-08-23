@@ -1,0 +1,6 @@
+interface:
+  display_name: "Shape Solution"
+  short_description: "Clarify consequential choices and design changes"
+  default_prompt: "Use $shape-solution to design this software change without adding unnecessary process."
+policy:
+  allow_implicit_invocation: true

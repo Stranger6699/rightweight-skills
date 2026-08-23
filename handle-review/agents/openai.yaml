@@ -1,0 +1,6 @@
+interface:
+  display_name: "Handle Review"
+  short_description: "Evaluate and address concrete review feedback"
+  default_prompt: "Use $handle-review to verify and address this review feedback."
+policy:
+  allow_implicit_invocation: true

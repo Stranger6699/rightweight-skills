@@ -1,0 +1,6 @@
+interface:
+  display_name: "Test Driven"
+  short_description: "Use strict red-green-refactor when requested"
+  default_prompt: "Use $test-driven to implement this change with strict red-green-refactor."
+policy:
+  allow_implicit_invocation: false

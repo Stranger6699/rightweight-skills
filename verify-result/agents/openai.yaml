@@ -1,0 +1,6 @@
+interface:
+  display_name: "Verify Result"
+  short_description: "Verify completion claims with current evidence"
+  default_prompt: "Use $verify-result to verify this result with proportionate evidence."
+policy:
+  allow_implicit_invocation: true

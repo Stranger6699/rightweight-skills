@@ -1,0 +1,6 @@
+interface:
+  display_name: "Manage Git Work"
+  short_description: "Recommend and perform user-chosen Git workflows"
+  default_prompt: "Use $manage-git-work to recommend the appropriate Git workflow and wait for my choice."
+policy:
+  allow_implicit_invocation: false

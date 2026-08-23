@@ -1,0 +1,6 @@
+interface:
+  display_name: "Choose Workflow"
+  short_description: "Recommend a right-sized development workflow"
+  default_prompt: "Use $choose-workflow to recommend the smallest sufficient workflow for this task."
+policy:
+  allow_implicit_invocation: false
