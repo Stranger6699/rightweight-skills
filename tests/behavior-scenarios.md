@@ -2,6 +2,8 @@
 
 这些场景用于检查 Skill 的路由、授权边界和停止条件。验证重点是可观察行为，而不是回复中是否出现固定措辞。
 
+其中 4 个高价值场景已经结构化并可通过 [`behavior/run.py`](behavior/run.py) 执行：只诊断、只计划、明确 TDD、无证据完成声明。本文保留完整的人工覆盖清单；[`behavior/scenarios.json`](behavior/scenarios.json) 是自动化场景的机器可读定义。
+
 ## 路由
 
 ### 轻量修改
