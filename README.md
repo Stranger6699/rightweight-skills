@@ -29,7 +29,13 @@ Rightweight 是一套面向编码 Agent 的可组合软件开发 Skills。它为
 | `verify-result` | 自动 | 在声称完成、修复或通过之前取得证据 |
 | `manage-git-work` | 仅显式 | 推荐或执行用户选择的 Git 工作流 |
 
-“精准自动”表示保留自动发现，但 `description` 明确排除普通局部任务。套件没有必须先运行的总入口，也没有 Skill 会仅因传统顺序而强制启动下一项流程。
+所有已安装的 Skill 都会被 Codex 发现；调用策略只决定它们能否在未点名时被隐式调用：
+
+- **仅显式**：`allow_implicit_invocation: false`，需要通过 `$skill-name` 或 Skill 选择器调用。
+- **自动**：允许隐式调用，`description` 覆盖常见的直接触发场景。
+- **精准自动**：同样允许隐式调用，但 `description` 主动排除普通局部任务，只匹配更明确的风险或流程需求。
+
+套件没有必须先运行的总入口，也没有 Skill 会仅因传统顺序而强制启动下一项流程。
 
 ## 典型组合
 
@@ -52,13 +58,31 @@ shape-solution -> 用户确认 -> write-plan -> implement-change
 
 ## 安装到 Codex
 
-将需要的 Skill 目录复制或链接到 Codex 的个人 Skills 目录。Windows 默认位置通常为：
+每个目录都是独立 Skill，可以只安装其中一部分。将完整的 Skill 目录复制或链接到以下任一位置：
+
+| 范围 | Windows 路径 | 用途 |
+|---|---|---|
+| 个人 | `%USERPROFILE%\.agents\skills\` | 在该用户的所有项目中使用 |
+| 仓库 | `<仓库根目录>\.agents\skills\` | 随仓库共享，只在该仓库中使用 |
+
+例如，安装后应存在如下文件：
 
 ```text
-%USERPROFILE%\.codex\skills\
+%USERPROFILE%\.agents\skills\implement-change\SKILL.md
 ```
 
-每个目录都是独立 Skill，可以只安装其中一部分。重新打开任务后，Codex 会根据 `SKILL.md` 和 `agents/openai.yaml` 发现它们。
+`SKILL.md` 是发现 Skill 所需的入口；`agents/openai.yaml` 是可选的界面与调用策略元数据。Codex 通常会自动检测新增或更新的 Skill；若没有出现，请重启 Codex。完整位置和元数据规则见 [OpenAI 的 Build skills 文档](https://developers.openai.com/codex/skills/)。
+
+## 开发环境
+
+项目级静态校验需要 Python 和 `requirements-dev.txt` 中的依赖；GitHub Actions 当前以 Python 3.12 为基准。行为评测还需要：
+
+- Git，且支持 `git init -b`
+- 已安装并可从 `PATH` 调用的 Codex CLI
+- 支持 `--ephemeral`、`--ignore-user-config` 和 `--sandbox` 的 Codex CLI 版本
+- 可用的本地 Codex 认证或 `OPENAI_API_KEY`
+
+运行行为评测前可用 `python --version`、`git --version` 和 `codex --version` 记录实际环境；比较修改前后结果时应保持这些版本一致。
 
 ## 验证
 
@@ -88,13 +112,19 @@ python -X utf8 tests/behavior/run.py --all
 python -X utf8 tests/behavior/run.py --all --model <模型 ID> --repeat 3
 ```
 
-运行器会创建临时 Git 仓库，将当前 Skills 安装到仓库级 `.agents/skills/`，并使用一次性 `HOME` 和 `CODEX_HOME` 启动 `codex exec --json`。它只临时复制 `auth.json`，不加载个人配置或个人 Skills；运行结束后始终删除临时认证环境。需要检查最终 fixture 时使用 `--keep-workdir`，该选项只把工作区复制到 `.artifacts`，不会保留认证文件。
+运行器会创建临时 Git 仓库，将当前 Skills 安装到仓库级 `.agents/skills/`，并使用一次性 `HOME` 和 `CODEX_HOME` 启动 `codex exec --json`。它不加载个人配置或个人 Skills；使用本地 Codex 认证时，会把 `auth.json` 临时复制到一次性 `CODEX_HOME`，并在正常退出路径中删除整个临时环境。
 
-每项评测生成 `pass`、`fail` 或 `indeterminate`，完整轨迹和 verdict 保存在 `.artifacts/behavior/`。Verdict 同时记录 Codex CLI 版本、模型、Skills Git revision、未提交状态、Skill 内容 SHA-256 指纹和重复序号：
+`auth.json` 包含敏感凭据。只对已经审查、可信的 Skill revision 运行真实行为评测，不要用个人认证直接执行来源不明的分支或补丁。`--keep-workdir` 只让运行器复制 fixture 工作区，不会主动复制临时认证目录；但被评测内容仍可能把敏感数据写入工作区或工具输出，因此共享 `.artifacts` 前必须检查其内容。
+
+每个已启动的场景都会在 `.artifacts/behavior/` 中生成 verdict，状态为 `pass`、`fail` 或 `indeterminate`。模型、Skills Git revision、未提交状态、Skill 内容 SHA-256 指纹和重复序号会写入 verdict；找到 Codex CLI 后还会记录其版本。`codex exec` 返回后会保存 `trace.jsonl` 和 `stderr.log`，但认证缺失、找不到可执行文件、场景初始化失败或超时等提前结束路径可能只有 verdict。
 
 - `pass`：Codex 正常完成，并且所有确定性检查通过。
 - `fail`：运行有效，但至少一个行为检查失败。
 - `indeterminate`：认证、超时、空轨迹、fixture 或检查器故障，不能据此判断 Skill 行为。
 
 真实行为评测会使用模型额度且需要本地认证，因此默认只手动或在可信的定时环境运行，不进入公共 CI。修改行为塑造文本时，应固定 Codex CLI、模型和场景，对修改前后各运行至少 3 次；概率性或压力场景建议至少 5 次，并人工阅读异常轨迹。
+
+## 许可证
+
+本项目采用 [Apache License 2.0](LICENSE) 开源许可证。
 

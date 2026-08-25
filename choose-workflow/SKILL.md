@@ -1,6 +1,6 @@
 ---
 name: choose-workflow
-description: Use when the user explicitly asks which software-development workflow fits a task, or when consequential ambiguity makes the appropriate level of process genuinely unclear.
+description: Use when the user explicitly invokes this skill to choose which software-development workflow fits a task. Do not invoke implicitly just because a task is about to start or its process is unclear.
 ---
 
 # 选择工作流
