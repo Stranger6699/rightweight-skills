@@ -1,0 +1,9 @@
+{
+  "name": "rightweight-skills",
+  "description": "Right-sized software development workflows for coding agents",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "keywords": ["skills", "workflow", "planning", "debugging", "tdd", "verification"]
+}

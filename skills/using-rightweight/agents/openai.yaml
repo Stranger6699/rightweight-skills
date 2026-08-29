@@ -1,0 +1,6 @@
+interface:
+  display_name: "Using Rightweight"
+  short_description: "Discover and apply the right workflow skill"
+  default_prompt: "Use $using-rightweight to check for the relevant Rightweight skill before acting."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,12 @@
+{
+  "name": "rightweight-skills",
+  "version": "1.0.0",
+  "description": "Right-sized software development workflows for coding agents",
+  "type": "module",
+  "main": ".opencode/plugins/rightweight.js",
+  "keywords": ["pi-package", "skills", "workflow", "tdd", "debugging"],
+  "pi": {
+    "extensions": ["./.pi/extensions/rightweight.ts"],
+    "skills": ["./skills"]
+  }
+}

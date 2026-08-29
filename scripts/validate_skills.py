@@ -52,8 +52,11 @@ def load_yaml(path: Path, validation: Validation) -> Any:
 
 
 def discover_skills(root: Path) -> list[Path]:
+    skills_root = root / "skills"
+    if not skills_root.is_dir():
+        skills_root = root
     return sorted(
-        path for path in root.iterdir() if path.is_dir() and (path / "SKILL.md").is_file()
+        path for path in skills_root.iterdir() if path.is_dir() and (path / "SKILL.md").is_file()
     )
 
 
@@ -253,7 +256,7 @@ def main() -> int:
     validation = Validation()
     skills = discover_skills(root)
     if not skills:
-        validation.error(f"{root}: no top-level skills found")
+        validation.error(f"{root}: no skills found under skills/ or repository root")
 
     names = {name for skill in skills if (name := validate_skill(skill, validation))}
     if len(names) != len(skills):

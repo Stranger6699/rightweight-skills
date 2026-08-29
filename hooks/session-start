@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+SKILLS_ROOT="${PLUGIN_ROOT}/skills"
+BOOTSTRAP="${SKILLS_ROOT}/using-rightweight/SKILL.md"
+
+content=$(cat "${BOOTSTRAP}" 2>&1 || echo "Error reading using-rightweight skill")
+mapping_file="${SKILLS_ROOT}/using-rightweight/references/codex-tools.md"
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then mapping_file="${SKILLS_ROOT}/using-rightweight/references/cursor-tools.md"; fi
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then mapping_file="${SKILLS_ROOT}/using-rightweight/references/claude-tools.md"; fi
+if [ -n "${GEMINI_CLI:-}" ]; then mapping_file="${SKILLS_ROOT}/using-rightweight/references/gemini-tools.md"; fi
+if [ -n "${COPILOT_CLI:-}" ]; then mapping_file="${SKILLS_ROOT}/using-rightweight/references/copilot-tools.md"; fi
+if [ -f "${mapping_file}" ]; then content="${content}\n\n$(cat "${mapping_file}")"; fi
+
+escape_json() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  value="${value//$'\n'/\\n}"
+  value="${value//$'\r'/\\r}"
+  value="${value//$'\t'/\\t}"
+  printf '%s' "$value"
+}
+
+context="<RIGHTWEIGHT-SESSION-START>\nThe Rightweight bootstrap and tool mapping below are already loaded.\n\n$(escape_json "$content")\n</RIGHTWEIGHT-SESSION-START>"
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  printf '{"additional_context":"%s"}\n' "$context"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$context"
+else
+  printf '{"additionalContext":"%s"}\n' "$context"
+fi

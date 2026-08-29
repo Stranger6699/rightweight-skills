@@ -1,0 +1,15 @@
+{
+  "name": "rightweight-skills",
+  "version": "1.0.0",
+  "description": "Right-sized planning, implementation, debugging, review, and verification skills.",
+  "license": "Apache-2.0",
+  "skills": "./skills/",
+  "hooks": {},
+  "interface": {
+    "displayName": "Rightweight Skills",
+    "shortDescription": "Right-sized development workflows for coding agents",
+    "longDescription": "A composable skills library that scales process to risk and keeps evidence ahead of completion claims.",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"]
+  }
+}

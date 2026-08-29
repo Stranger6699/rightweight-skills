@@ -18,6 +18,7 @@ Rightweight 是一套面向编码 Agent 的可组合软件开发 Skills。它为
 
 | Skill | 调用策略 | 用途 |
 |---|---|---|
+| `using-rightweight` | 自动 | 会话启动时发现并加载适用 Skill |
 | `choose-workflow` | 仅显式 | 用户需要判断任务应采用何种流程 |
 | `shape-solution` | 精准自动 | 关键歧义、架构取舍或高风险设计 |
 | `write-plan` | 精准自动 | 已明确的复杂工作需要排序和检查点 |
@@ -56,22 +57,57 @@ shape-solution -> 用户确认 -> write-plan -> implement-change
 
 箭头表示常见组合，不表示强制调用链。
 
+## 跨 Agent 适配
+
+本仓库采用与 Superpowers 相同的三层适配模型：
+
+1. `skills/*/SKILL.md` 是共享且不依赖工具名称的行为规范。
+2. `skills/using-rightweight/references/*-tools.md` 将“读文件、编辑、运行命令、调用 Skill”等动作映射到具体 Agent 的工具。
+3. 各运行器的安装入口在会话开始注入 `using-rightweight` bootstrap，使 Skill 能自动触发。
+
+不要为不同 Agent 复制或改写 Skill 正文；新增运行器时只增加适配层，并通过该运行器自己的插件/扩展安装机制分发。
+
+| Agent | 适配入口 | 会话启动方式 |
+|---|---|---|
+| Codex App / CLI | `.codex-plugin/plugin.json` | 原生 Skill 发现，`using-rightweight` 自动触发 |
+| Claude Code | `.claude-plugin/plugin.json` + `hooks/` | `SessionStart` hook |
+| Cursor | `.cursor-plugin/plugin.json` + `hooks/` | `sessionStart` hook |
+| Gemini CLI | `gemini-extension.json` + `GEMINI.md` | 扩展声明的 context file |
+| GitHub Copilot CLI | `.claude-plugin/plugin.json` + `hooks/` | SDK `additionalContext` hook |
+| OpenCode | `package.json` + `.opencode/plugins/rightweight.js` | 消息 transform 注入 |
+| Pi | `package.json` + `.pi/extensions/rightweight.ts` | `session_start` / `context` 注入 |
+
+各 Agent 的精确工具名以运行时暴露的工具列表为准；缺少可选能力时，Skill 中的降级路径（例如计划文件或当前会话内执行）仍然适用。
+
+新增运行器的完整清单见 [`docs/porting-to-new-harness.md`](docs/porting-to-new-harness.md)。
+
 ## 安装到 Codex
 
-每个目录都是独立 Skill，可以只安装其中一部分。将完整的 Skill 目录复制或链接到以下任一位置：
+`skills/` 下的每个目录都是独立 Skill，可以只安装其中一部分。将完整仓库作为插件安装，或将需要的 Skill 目录复制/链接到以下任一位置：
 
 | 范围 | Windows 路径 | 用途 |
 |---|---|---|
 | 个人 | `%USERPROFILE%\.agents\skills\` | 在该用户的所有项目中使用 |
 | 仓库 | `<仓库根目录>\.agents\skills\` | 随仓库共享，只在该仓库中使用 |
 
-例如，安装后应存在如下文件：
+例如，手动安装后应存在如下文件：
 
 ```text
 %USERPROFILE%\.agents\skills\implement-change\SKILL.md
 ```
 
 `SKILL.md` 是发现 Skill 所需的入口；`agents/openai.yaml` 是可选的界面与调用策略元数据。Codex 通常会自动检测新增或更新的 Skill；若没有出现，请重启 Codex。完整位置和元数据规则见 [OpenAI 的 Build skills 文档](https://developers.openai.com/codex/skills/)。
+
+### 其他运行器
+
+- Claude Code：从包含本仓库的插件目录安装，插件会自动发现 `SKILL.md` 并运行 `SessionStart` hook。
+- Cursor：通过插件市场安装，或将仓库作为本地插件加载；`hooks-cursor.json` 负责启动注入。
+- Gemini CLI：`gemini extensions install <仓库地址>`，扩展会加载仓库内的 `GEMINI.md`。
+- GitHub Copilot CLI：使用兼容的插件市场安装；启动 hook 会输出 SDK 标准的 `additionalContext`。
+- OpenCode：将仓库作为包加载（`package.json` 的 `main` 指向插件），无需修改用户配置文件。
+- Pi：`pi install git:<仓库地址>`；扩展会注册 Skill 路径，并在新会话和压缩后重新注入 bootstrap。
+
+安装后用一个全新会话发送“帮我实现一个功能”，确认 Agent 在第一次文件操作前先检查并加载适用 Skill。若要验证具体运行器的自动触发，应记录完整会话轨迹，而不只检查文件是否存在。
 
 ## 开发环境
 
@@ -123,6 +159,12 @@ python -X utf8 tests/behavior/run.py --all --model <模型 ID> --repeat 3
 - `indeterminate`：认证、超时、空轨迹、fixture 或检查器故障，不能据此判断 Skill 行为。
 
 真实行为评测会使用模型额度且需要本地认证，因此默认只手动或在可信的定时环境运行，不进入公共 CI。修改行为塑造文本时，应固定 Codex CLI、模型和场景，对修改前后各运行至少 3 次；概率性或压力场景建议至少 5 次，并人工阅读异常轨迹。
+
+## 第三方署名与许可证
+
+部分运行器适配基础设施参考并改编自 [obra/superpowers](https://github.com/obra/superpowers)，版权归 Jesse Vincent 所有，并按原项目 MIT License 保留第三方声明。涉及文件和完整许可证文本见 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)。
+
+Rightweight Skills 自身的 Skill 内容、文档、测试和原创代码采用 Apache License 2.0；第三方改编部分同时受 Superpowers 的 MIT 条款约束。
 
 ## 许可证
 

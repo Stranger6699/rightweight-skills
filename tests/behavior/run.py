@@ -19,6 +19,7 @@ from typing import Any, Callable
 
 
 ROOT = Path(__file__).resolve().parents[2]
+SKILLS_ROOT = ROOT / "skills"
 SCENARIOS_PATH = Path(__file__).with_name("scenarios.json")
 
 
@@ -150,7 +151,7 @@ def git(workdir: Path, *args: str) -> subprocess.CompletedProcess[str]:
 def initialize_fixture(workdir: Path, fixture: str) -> str:
     FIXTURES[fixture](workdir)
     skills_root = workdir / ".agents" / "skills"
-    for skill_dir in sorted(path for path in ROOT.iterdir() if (path / "SKILL.md").is_file()):
+    for skill_dir in sorted(path for path in SKILLS_ROOT.iterdir() if (path / "SKILL.md").is_file()):
         shutil.copytree(skill_dir, skills_root / skill_dir.name)
 
     commands = [
@@ -355,7 +356,7 @@ def skill_content_digest() -> str:
     digest = hashlib.sha256()
     paths = sorted(
         file
-        for skill_dir in ROOT.iterdir()
+        for skill_dir in SKILLS_ROOT.iterdir()
         if (skill_dir / "SKILL.md").is_file()
         for file in skill_dir.rglob("*")
         if file.is_file()
