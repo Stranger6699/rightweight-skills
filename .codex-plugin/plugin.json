@@ -2,7 +2,7 @@
   "name": "rightweight-skills",
   "version": "1.0.0",
   "description": "Right-sized planning, implementation, debugging, review, and verification skills.",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "skills": "./skills/",
   "hooks": {},
   "interface": {

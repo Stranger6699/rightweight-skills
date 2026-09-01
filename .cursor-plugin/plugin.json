@@ -3,7 +3,7 @@
   "displayName": "Rightweight Skills",
   "description": "Right-sized software development workflows for coding agents",
   "version": "1.0.0",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "skills": "./skills/",
   "hooks": "./hooks/hooks-cursor.json"
 }

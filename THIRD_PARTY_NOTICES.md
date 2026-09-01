@@ -41,6 +41,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-Rightweight Skills 自身的 Skill 内容、文档、测试和原创适配代码仍按仓库
-根目录的 Apache License 2.0 发布。Superpowers 与 Jesse Vincent 并非
+Rightweight Skills 自身的 Skill 内容、文档、测试和原创适配代码按仓库
+根目录的 MIT License 发布。上述第三方版权声明仍须保留。Superpowers 与 Jesse Vincent 并非
 Rightweight Skills 的维护者，也不表示对本项目的认可或担保。

@@ -164,9 +164,9 @@ python -X utf8 tests/behavior/run.py --all --model <模型 ID> --repeat 3
 
 部分运行器适配基础设施参考并改编自 [obra/superpowers](https://github.com/obra/superpowers)，版权归 Jesse Vincent 所有，并按原项目 MIT License 保留第三方声明。涉及文件和完整许可证文本见 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)。
 
-Rightweight Skills 自身的 Skill 内容、文档、测试和原创代码采用 Apache License 2.0；第三方改编部分同时受 Superpowers 的 MIT 条款约束。
+Rightweight Skills 自身的 Skill 内容、文档、测试和原创代码采用 MIT License；第三方改编部分保留 Superpowers 原项目的版权声明和 MIT 条款。
 
 ## 许可证
 
-本项目采用 [Apache License 2.0](LICENSE) 开源许可证。
+本项目采用 [MIT License](LICENSE) 开源许可证。
 
